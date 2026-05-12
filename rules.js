@@ -1,0 +1,20 @@
+// [UP, RIGHT, DOWN, LEFT]
+// A = Grass
+// B = Empty
+// [0] = [AA, AA, AB, BA]
+// [1] = [BB, BA, AB, BB]
+// [2] = [BB, BA, AA, AB]
+// [3] = [BB, BB, BA, AB]
+// [4] = [AA, AB, BA, AA]
+// [5] = [BA, AA, AB, BB]
+// [6] = [AA, AA, AA, AA]
+// [7] = [AB, BB, BA, AA]
+// [8] = [AB, BA, AA, AA]
+// [9] = [BA, AA, AA, AB]
+// [10] = [BA, AB, BB, BB]
+// [11] = [AA, AB, BB, BA]
+// [12] = [AB, BB, BB, BA]
+// [13] = [BA, AB, BB, BB]
+// [14] = [AA, AB, BB, BA]
+// [15] = [AB, BB, BB, BA]
+// [16] = [BB, BB, BB, BB] Empty tile with no image/water
