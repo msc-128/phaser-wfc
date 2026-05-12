@@ -325,6 +325,7 @@ function update ()
 {
     if(Phaser.Input.Keyboard.JustDown(this.regenKey)){
         terrain = Phaser.Utils.Array.GetRandom(["grass", "dirt", "rocky", "sand", "snowy"]);
+        this.isDone = false;
         this.scene.restart();
     }
 }
