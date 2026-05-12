@@ -106,7 +106,7 @@ function decorate(){
 }
 
 function step(){
-    if (this.isDone) {continue};
+    if (this.isDone) {return};
     let pos = getLowestEntropy.call(this);
     if(!pos){
         console.log("done!");
