@@ -106,9 +106,11 @@ function decorate(){
 }
 
 function step(){
+    if (this.isDone) {continue};
     let pos = getLowestEntropy.call(this);
     if(!pos){
         console.log("done!");
+        this.isDone = true;
         this.wfcTimer.remove();
         decorate.call(this);
         return;
