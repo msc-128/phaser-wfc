@@ -10,16 +10,19 @@ var config = {
 };
 
 var game = new Phaser.Game(config);
-let grassTiles = []
+let grassTextures = []; // store grass
 
 function preload ()
 {
+    this.grassTiles = []
+    // Loading grass tiles
     for(let i = 0; i <= 12; i++){
         const name = `grass${i}`;
-        grassTiles.push(name);
+        grassTextures.push(name);
         this.load.image(name, `./PNG/grass_tiles/grass${i}.png`);
     }
 
+    // Load water
     this.load.image('water', './PNG/water3.png')
 }
 
@@ -34,12 +37,18 @@ function create ()
     // Load grass sprites
     let index = 0
     for(let x = 1; x <= 13; x++){
-        this.add.image((x * 64) + 32, 96, grassTiles[index])
+        let tile = this.add.image((x * 64) + 32, 96, grassTextures[index])
+        this.grassTiles.push(tile)
         index++;
     }
-
+    this.regenKey = this.input.keyboard.addKey('R')
 }
 
 function update ()
 {
+    if(Phaser.Input.Keyboard.JustDown(this.regenKey)){
+        for(let tile of this.grassTiles){
+            tile.setPosition(Phaser.Math.Between(0, 1280), Phaser.Math.Between(0, 960)) // will alter to fit WFC later
+        }
+    }
 }
