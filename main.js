@@ -36,7 +36,20 @@ function getLowestEntropy(){
 
 function collapse(x, y){
     let options = this.grid[x][y];
-    let chosen = Phaser.Utils.Array.GetRandom(options);
+    let totalWeight = 0;
+    for(let tile of options){
+        totalWeight += this.weights[tile] || 1;
+    }
+    let rand = Math.random() * totalWeight;
+    let chosen = options[0];
+    for(let tile of options){
+        rand -= this.weights[tile] || 1;
+        if(rand <= 0){
+            chosen = tile;
+            break;
+        }
+    }
+    console.log(chosen);
     this.grid[x][y] = [chosen];
     return chosen;
 }
@@ -69,11 +82,14 @@ function decorate(){
     for(let x = 0; x < GRID_COLS; x++) {
         for(let y = 0; y < GRID_ROWS; y++) {
             console.log(this.grid[x][y][0]);
-            if (this.grid[x][y][0] != "grass16") {
+            if (this.grid[x][y][0] != "grass16" && this.grid[x][y][0] != "grass15" &&
+                this.grid[x][y][0] != "grass14" && this.grid[x][y][0] != "grass13" &&
+                this.grid[x][y][0] != "grass12" && this.grid[x][y][0] != "grass11" &&
+                this.grid[x][y][0] != "grass10") {
                 let r = Math.random();
                 let decorX = ((x+1) * TILE_SIZE) - TILE_SIZE/2;
                 let decorY = ((y+1) * TILE_SIZE) - TILE_SIZE/2;
-                if (r < 0.5) {
+                if (r < 0.7) {
                     continue;
                 } else if (r < 0.8) {
                     this.add.image(decorX, decorY, 'dec0')
@@ -121,11 +137,11 @@ function preload ()
     }
 
     // Loading decor
-    this.decor = [];
+    this.decorGrass = [];
     for (let i = 0; i <= 3; i++) {
         const name = `dec${i}`;
         decorTextures.push(name);
-        this.load.image(name, `./PNG/decor/dec${i}.png`);
+        this.load.image(name, `./PNG/decor_grass/dec${i}.png`);
         }
 
     // Load water
@@ -139,116 +155,8 @@ function create ()
     this.rows = GRID_ROWS;
     this.grid = [];
     this.resolvedGrid = [];
-    /*
-    // Rules
-    this.rules = { // UP RIGHT LEFT DOWN
-    // numbers correlate to the ith grass tile
-        // 16 is the empty tile
-        grass0: {
-            up: [2,6,8,9],
-            right: [4,6,7,8],
-            left: [4,10,13],
-            down: [9,10,13]
-        },
-        grass1: {
-            up: [16,10,11,12,13,14,15,16],
-            right: [2,3,9],
-            left: [3,7,12,15,16],
-            down: [5,9,13,10]
-        },
-        grass2: {
-            up: [16,10,11,12,13,14,15,16],
-            right: [2,3,9],
-            left: [2,1,8],
-            down: [0,6,4,14,11]
-        },
-        grass3: {
-            up: [16,10,11,12,13,14,15,16],
-            right: [5,13,16],
-            left: [1,2,8],
-            down: [7,8,12,15]
-        },
-        grass4: {
-            up: [2,6,8,9],
-            right: [0,12,15],
-            left: [0,5,6,9],
-            down: [8]
-        },
-        grass5: {
-            up: [1,5],
-            right: [3,4,6,7,8],
-            left: [16],
-            down: [5,9,10,13]
-        },
-        grass6: {
-            up: [2,6,8,9],
-            right: [4,6,7,8],
-            left: [0,5,6,9],
-            down: [0,4,6,11,14]
-        },
-        grass7: {
-            up: [3,7],
-            right: [13,16],
-            left: [0,5,6,9],
-            down: [7,12,15]
-        },
-        grass8: {
-            up: [3,4],
-            right: [2,3,9],
-            left: [0,5,6,9],
-            down: [0,4,6,11,14]
-        },
-        grass9: {
-            up: [0,1,5],
-            right: [4,6,7,8],
-            left: [1,8],
-            down: [0,4,6,11,14]
-        },
-        grass10: {
-            up: [0,1,5],
-            right: [0,11,12],
-            left: [16],
-            down: [1,2,3,16]
-        },
-        grass11: {
-            up: [2,6,8,9],
-            right: [11,12],
-            left: [10,11],
-            down: [1,2,3,16]
-        },
-        grass12: {
-            up: [3,7],
-            right: [1,4,5,10,13,16],
-            left: [10,11],
-            down: [1,2,3,16]
-        },
-        grass13: {
-            up: [0,1,5],
-            right: [0,14,15],
-            left: [3,7,12,15,16],
-            down: [1,2,3,16]
-        },
-        grass14: {
-            up: [2,6,8,9],
-            right: [14,15],
-            left: [13,14],
-            down: [1,2,3,16]
-        },
-        grass15: {
-            up: [3,7],
-            right: [1,4,5,10,13,16],
-            left: [13,14],
-            down: [1,2,3,16]
-        },
-        grass16: {
-            up: [10,11,12,13,14,15,16],
-            right: [1,5,10,13,16],
-            left: [3,7,12,15,16],
-            down: [1,2,3,16]
-        }
-    }
-    */
 
+    // Rules
     this.sockets = {
         grass0:  { up: "AA", right: "AA", down: "BA", left: "AB" },
         grass1:  { up: "BB", right: "BA", down: "BA", left: "BB" },
@@ -267,6 +175,26 @@ function create ()
         grass14: { up: "AA", right: "AB", down: "BB", left: "AB" },
         grass15: { up: "AB", right: "BB", down: "BB", left: "AB" },
         grass16: { up: "BB", right: "BB", down: "BB", left: "BB" }
+    };
+
+    this.weights = {
+        grass0: 3,
+        grass1: 3,
+        grass2: 8,
+        grass3: 3,
+        grass4: 3,
+        grass5: 8,
+        grass6: 50,
+        grass7: 8,
+        grass8: 3,
+        grass9: 3,
+        grass10: 3,
+        grass11: 8,
+        grass12: 3,
+        grass13: 3,
+        grass14: 8,
+        grass15: 3,
+        grass16: 150,
     };
 
     this.rules = {};
@@ -322,7 +250,7 @@ function create ()
    
     this.regenKey = this.input.keyboard.addKey('R')
     this.wfcTimer = this.time.addEvent({
-        delay: 20,
+        delay: 5,
         loop: true,
         callback: step,
         callbackScope: this
