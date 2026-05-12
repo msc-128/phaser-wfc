@@ -1,7 +1,11 @@
+const TILE_SIZE = 64;
+const GRID_COLS = 20;
+const GRID_ROWS = 15;
+
 var config = {
     type: Phaser.AUTO,
-    width: 1280,
-    height: 960,
+    width: GRID_COLS * TILE_SIZE,
+    height: GRID_ROWS * TILE_SIZE,
     scene: {
         preload: preload,
         create: create,
@@ -61,25 +65,50 @@ function propagate(x, y){
     }
 }
 
+function decorate(){
+    for(let x = 0; x < GRID_COLS; x++) {
+        for(let y = 0; y < GRID_ROWS; y++) {
+            console.log(this.grid[x][y][0]);
+            if (this.grid[x][y][0] != "grass16") {
+                let r = Math.random();
+                let decorX = ((x+1) * TILE_SIZE) - TILE_SIZE/2;
+                let decorY = ((y+1) * TILE_SIZE) - TILE_SIZE/2;
+                if (r < 0.5) {
+                    continue;
+                } else if (r < 0.8) {
+                    this.add.image(decorX, decorY, 'dec0')
+                } else if (r < 0.9) {
+                    this.add.image(decorX, decorY, 'dec1')
+                } else {
+                    this.add.image(decorX, decorY, 'dec2')
+                }
+            }
+        }
+    }
+}
+
 function step(){
     let pos = getLowestEntropy.call(this);
     if(!pos){
         console.log("done!");
+        this.wfcTimer.remove();
+        decorate.call(this);
         return;
     }
     let [x, y] = pos;
     let tile = collapse.call(this, x, y);
     propagate.call(this, x, y);
     this.resolvedGrid[x][y] = true;
-    this.add.image((x * 64) + 32, (y * 64) + 32, tile);
+    this.add.image((x * TILE_SIZE) + TILE_SIZE/2, (y * TILE_SIZE) + TILE_SIZE/2, tile);
     if (this.grid[x][y].length === 0) {
     console.error("Contradiction at", x, y);
     this.scene.restart();
-}
+    }
 }
 
 var game = new Phaser.Game(config);
 let grassTextures = []; // store grass
+let decorTextures = [];
 
 function preload ()
 {
@@ -91,6 +120,14 @@ function preload ()
         this.load.image(name, `./PNG/grass_tiles/grass${i}.png`);
     }
 
+    // Loading decor
+    this.decor = [];
+    for (let i = 0; i <= 3; i++) {
+        const name = `dec${i}`;
+        decorTextures.push(name);
+        this.load.image(name, `./PNG/decor/dec${i}.png`);
+        }
+
     // Load water
     this.load.image('water', './PNG/water3.png')
 }
@@ -98,8 +135,8 @@ function preload ()
 function create ()
 {
     // Grid data
-    this.cols = 20;
-    this.rows = 15;
+    this.cols = GRID_COLS;
+    this.rows = GRID_ROWS;
     this.grid = [];
     this.resolvedGrid = [];
     /*
@@ -277,15 +314,15 @@ function create ()
     }
     
     // Fill entire grid with water
-    for(let x = 1; x <= 20; x++){
-        for(let y = 1; y <= 15; y++){
-            this.add.image((x * 64) - 32, (y * 64) - 32, 'water')
+    for(let x = 1; x <= GRID_COLS; x++){
+        for(let y = 1; y <= GRID_ROWS; y++){
+            this.add.image((x * TILE_SIZE) - TILE_SIZE/2, (y * TILE_SIZE) - TILE_SIZE/2, 'water')
         }
     }
    
     this.regenKey = this.input.keyboard.addKey('R')
-    this.time.addEvent({
-        delay: 50,
+    this.wfcTimer = this.time.addEvent({
+        delay: 20,
         loop: true,
         callback: step,
         callbackScope: this
